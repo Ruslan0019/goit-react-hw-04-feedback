@@ -1,43 +1,43 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Statistics } from 'components/Statistics/Statistics';
 import { FeedbackOptions } from 'components/FeedbackOptions/FeedbackOptions';
 import { Section } from 'components/Section/Section';
 import { Notification } from 'components/Notification/Notification';
 
-export const App = () => {
-  const [good, setGood] = useState(0);
-  const [neutral, setNeutral] = useState(0);
-  const [bad, setBad] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [feedback, setFeedback] = useState(0);
+const App = () => {
+  const [feedbackCounts, setFeedbackCounts] = useState({
+    good: 0,
+    neutral: 0,
+    bad: 0,
+  });
 
-  useEffect(() => {
-    const updateFeedbackStats = () => {
-      const newTotal = good + neutral + bad;
-      const newFeedback =
-        newTotal === 0 ? 0 : Math.floor((good / newTotal) * 100);
-      setTotal(newTotal);
-      setFeedback(newFeedback.toFixed(2));
-    };
-    updateFeedbackStats();
-  }, [good, neutral, bad]);
-  const handleClick = () => {
-    setGood(prevGood => prevGood + 1);
+  const handleClick = feedbackType => {
+    setFeedbackCounts(prevCounts => ({
+      ...prevCounts,
+      [feedbackType]: prevCounts[feedbackType] + 1,
+    }));
   };
-  const handleClick1 = () => {
-    setNeutral(prevneutral => prevneutral + 1);
+
+  const countTotalFeedback = () => {
+    const { good, neutral, bad } = feedbackCounts;
+    return good + neutral + bad;
   };
-  const handleClick2 = () => {
-    setBad(prevbad => prevbad + 1);
+
+  const countPositiveFeedbackPercentage = () => {
+    const { good } = feedbackCounts;
+    const total = countTotalFeedback();
+    return total === 0 ? 0 : Math.floor((good / total) * 100);
   };
+
+  const { good, neutral, bad } = feedbackCounts;
+  const total = countTotalFeedback();
+  const feedback = countPositiveFeedbackPercentage();
+  const options = ['good', 'neutral', 'bad'];
+
   return (
     <>
       <Section title="Please leave feedback">
-        <FeedbackOptions
-          handleClick={handleClick}
-          handleClick1={handleClick1}
-          handleClick2={handleClick2}
-        />
+        <FeedbackOptions options={options} onLeaveFeedback={handleClick} />
       </Section>
       <Section title="Statistics">
         {total > 0 ? (
@@ -55,3 +55,5 @@ export const App = () => {
     </>
   );
 };
+
+export default App;
